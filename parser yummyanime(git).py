@@ -27,7 +27,7 @@ def parse(html):
                 projects.append({ 'Название': cols[0].span.text.strip() })
         return projects
 def save (projects, path):
-    with open(path, 'w') as csvfile:
+    with open(path, 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(('Название', 'Рейтинг'))
 
