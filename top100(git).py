@@ -71,7 +71,8 @@ def main():
     data = []
     data.extend(parse(get_html('https://yummyanime.club/top')))
     save(data, 'top100.csv')
-#test
+fetch#test
 #test2
+
 if __name__ == '__main__':
     main()
