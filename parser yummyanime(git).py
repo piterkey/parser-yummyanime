@@ -1,60 +1,35 @@
 ##! /usr/bin/env python
 ## -*- coding: utf-8 -*-
-import csv
 import urllib.request
 from urllib.request import Request
 from bs4 import BeautifulSoup
 
-num = 0
+animesite = 'https://yummyanime.tv/user/'
+
+
 def get_html(url):
     req = Request(url, headers={'User-Agent': 'Mozilla/5.0'})
     webpage = urllib.request.urlopen(req).read()
     return webpage
 
-def parse(html):
-    soup = BeautifulSoup(html, "html.parser")
-    alist = ['watch_now', 'will', 'watched', 'lost', 'favourite']
-    watched = soup.find('div', id = alist[get_value()])
-    projects = []
-    if watched != None:
-        for lis in watched.find_all('li'):
-            cols = lis.find_all('span')
-            try: projects.append({
-                'Название': cols[0].span.text.strip(),
-                'Рейтинг':  cols[0].find(class_= 'user-rating').text.strip()
-            })
-            except:
-                projects.append({ 'Название': cols[0].span.text.strip() })
-        return projects
-def save (projects, path):
-    with open(path, 'w', newline='') as csvfile:
-        writer = csv.writer(csvfile)
-        writer.writerow(('Название', 'Рейтинг'))
-
-        for project in projects:
-            try: 
-                writer.writerow((project['Название'], project['Рейтинг']))
-            except: 
-                writer.writerow((project['Название'],))
 
 def main():
-    id_ = input('Write your id(yummyanime.club/users/id...):')
-    alist = ['anime watching1.csv', 'anime will1.csv', 'anime watched1.csv', 'anime lost1.csv', 'anime favourite1.csv']
-    for tag in alist:
-        projects = []
-        try:
-            projects.extend(parse(get_html('https://yummyanime.club/users/id'+ id_)))
-            save(projects, tag)
-            set_value(get_value()+1)
-        except: 
-            continue
-def get_value():
-    global num
-    return num 
+    id_ = input("Write your profile name on site {0}".format(animesite).strip()) or "admin"
+    soup = BeautifulSoup(get_html(animesite + id_), "html.parser")
 
-def set_value(new_value):
-    global num
-    num = new_value
+    my_yammyanime = {'watching': 'tabz-1', 'watched': 'tabz-2', 'planned': 'tabz-3', 'postponed': 'tabz-4',
+                     'abandoned': 'tabz-5', 'favorites': 'tabz--1'}
+
+    with open("{0}_animelist.txt".format(id_), 'w', newline='', encoding="utf-8") as animefile:
+        for key, value in my_yammyanime.items():
+            animefile.write('\n' + '-----' + key + '-----' + '\n')
+            tabz_list = soup.find_all(name='div', id=value)
+            anime_list = tabz_list[0].find_all(name='a', attrs="popular-item__title ws-nowrap")
+            for anime in anime_list:
+                # print(anime.text, anime['href'])
+                animefile.write('- ' + anime.text + '; ' + anime['href'] + '\n')
+    print("Your anime lists written to {0}_animelist.txt".format(id_))
+
 
 if __name__ == '__main__':
     main()
